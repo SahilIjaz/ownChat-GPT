@@ -16,7 +16,7 @@ def init():
 
     st.set_page_config(page_title='Your own ChatGPT🫣', page_icon='🫣')
 
-    # Initialize session state
+    
     if "messages" not in st.session_state:
         st.session_state.messages = [
             SystemMessage(content='You are a helpful assistant.')
