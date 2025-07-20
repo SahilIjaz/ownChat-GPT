@@ -6,7 +6,10 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
 
+
+
 def init():
+
     load_dotenv()
     if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
         print("Please set the OPENAI_API_KEY environment variable.")
@@ -24,13 +27,15 @@ def init():
 
 
 def extract_topic(text):
-    """Return a brief summary to use as a sidebar history topic."""
     text = text.strip().split("?")[0]  
     return text[:40] + "..." if len(text) > 40 else text
 
 
 def main():
+    
     init()
+
+
 
     st.header('Your own ChatGPT')
 
