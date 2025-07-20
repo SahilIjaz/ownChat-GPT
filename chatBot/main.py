@@ -14,8 +14,20 @@ def init():
     else:
         print("OPENAI_API_KEY is set.")
 
-    st.set_page_config(page_title='Your own ChatGPT🫣',
-                       page_icon='🫣')  # <- should be st.set_page_config
+    st.set_page_config(page_title='Your own ChatGPT🫣', page_icon='🫣')
+
+    # Initialize session state
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            SystemMessage(content='You are a helpful assistant.')
+        ]
+
+
+def extract_topic(text):
+    """Return a brief summary to use as a sidebar history topic."""
+    text = text.strip().split("?")[0]  
+    return text[:40] + "..." if len(text) > 40 else text
+
 
 def main():
     init()
@@ -24,27 +36,41 @@ def main():
 
     chat = ChatOpenAI(temperature=0)
 
-    # Use session state to persist messages
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            SystemMessage(content='You are a helpful assistant.')
-        ]
+    # Display full chat in the main area
+    for msg in st.session_state.messages:
+        if isinstance(msg, HumanMessage):
+            message(msg.content, is_user=True)
+        elif isinstance(msg, AIMessage):
+            message(msg.content, is_user=False)
 
+  
     with st.sidebar:
-        user_input = st.text_input("Enter your message:", key="user_input", placeholder="Type here...")
+        st.subheader("Chat History 🧠")
 
+      
+        user_input = st.text_input("Ask something:", key="user_input", placeholder="Type here...")
+
+        st.markdown("---")
+        st.caption("Previous topics:")
+        for msg in reversed(st.session_state.messages):
+            if isinstance(msg, HumanMessage):
+                topic = extract_topic(msg.content)
+                st.markdown(f"• {topic}")
+
+  
     if user_input:
-        # Show user message
-        message(user_input, is_user=True)
-        st.session_state.messages.append(HumanMessage(content=user_input))
+  
+        user_msg = HumanMessage(content=user_input)
+        st.session_state.messages.append(user_msg)
 
-        # Get response from model
+        
         response = chat(st.session_state.messages)
-        st.session_state.messages.append(AIMessage(content=response.content))
+        ai_msg = AIMessage(content=response.content)
+        st.session_state.messages.append(ai_msg)
 
-        # Show bot response
-        message(response.content, is_user=False)
+        
+        st.experimental_rerun()
+
 
 if __name__ == "__main__":
     main()
-
